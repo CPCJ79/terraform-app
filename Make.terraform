@@ -1,0 +1,49 @@
+export UNAME_S ?= $(shell uname -s)
+
+export AWS_PROFILE ?= cloud-infra
+export AWS_DEFAULT_REGION ?= us-west-2
+
+export DRONE_REPO_NAME := $(shell basename ${PWD})
+
+
+DOCKER_IMAGE	:= docker.artifactory.local.23andme.net/23andme/saws/terraform
+DOCKER_TAG	:= latest
+
+DOCKER_ARGS ?=
+DOCKER_ARGS += --interactive
+DOCKER_ARGS += --tty
+DOCKER_ARGS += --rm
+DOCKER_ARGS += --env AWS_PROFILE --env AWS_DEFAULT_REGION
+DOCKER_ARGS += --env DRONE_REPO_NAME
+DOCKER_ARGS += --workdir /app
+DOCKER_ARGS += --volume ${PWD}:/app
+DOCKER_ARGS += --volume ${HOME}/.aws:/root/.aws
+DOCKER_ARGS += --volume ${HOME}/.netrc:/root/.netrc:ro
+DOCKER_ARGS += --pull always
+
+# This is specific to Docker for Mac, the VM that runs Docker on Mac
+# exposes this magic path for an ssh-agent instance on the host.
+# NB: If you are already using an SSH agent this new instance won't
+# have existing keys.
+#
+# For example, if using a YubiKey backed GPG key, the newly created
+# socket needs to be overwritten (once per boot of Docker for Mac):
+#
+# DM_SOCKET=$(lsof -p $(pgrep ssh-agent) | awk '$5 == "unix" {print $8}')
+# ln -sf ${HOME}/.gnupg/S.gpg-agent.ssh $(DM_SOCKET)
+
+SSH_AUTH_SOCK_MAGIC_PATH := /run/host-services/ssh-auth.sock
+
+ifeq ($(UNAME_S),Darwin)
+DOCKER_ARGS += --env SSH_AUTH_SOCK=$(SSH_AUTH_SOCK_MAGIC_PATH)
+DOCKER_ARGS += --volume $(SSH_AUTH_SOCK_MAGIC_PATH):$(SSH_AUTH_SOCK_MAGIC_PATH)
+endif
+
+
+local-docker : ENTRYPOINT ?= bash
+
+local-docker:
+	docker run \
+		$(DOCKER_ARGS) \
+		$(DOCKER_IMAGE):$(DOCKER_TAG) \
+		$(ENTRYPOINT)
