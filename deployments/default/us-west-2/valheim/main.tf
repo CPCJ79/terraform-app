@@ -42,7 +42,7 @@ module "app" {
 }
 
 resource "aws_ssm_parameter" "world_name" {
-  name = "world_name"
+  name = "/app/${local.app_name}/world_name"
   type = "String"
   value = local.app_name
 }
@@ -55,6 +55,6 @@ resource "random_password" "world_password" {
 
 resource "aws_ssm_parameter" "world_password" {
   name = "/app/${local.app_name}/world_password"
-  type = "String"
+  type = "SecureString"
   value = random_password.world_password.result
 }
