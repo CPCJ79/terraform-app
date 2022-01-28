@@ -90,6 +90,13 @@ data "aws_iam_policy_document" "instance_iam_policy" {
   }
 }
 
+# tfsec:ignore:AWS099
+resource "aws_iam_role_policy" "iam_access_policy" {
+  name   = join("-", [var.app_name, "-pol"])
+  role   = aws_iam_role.instance_role.name
+  policy = data.aws_iam_policy_document.instance_iam_policy.json
+}
+
 resource "aws_iam_instance_profile" "instance_instprof" {
   name = join("-", [var.app_name, "prof"])
   role = aws_iam_role.instance_role.name

@@ -66,7 +66,7 @@ resource "aws_lb_target_group" "instance" {
 
 # Application or network traget group dynamic block
 resource "aws_lb_target_group" "instance0" {
-  name     = var.lb_tg_name
+  name     = "${var.lb_tg_name}0"
   port     = var.lb_app2_port
   protocol = var.lb_app2_proto
   vpc_id   = var.lb_tg_vpc_id
