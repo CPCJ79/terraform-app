@@ -11,9 +11,9 @@ sudo yum install -y glibc.i686 libstdc++.i686
 sudo su valheim
 
 cd /home/valheim/
+mkdir -p valheim-server/
 curl -sqL "https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz" | tar zxvf -
-./steamcmd.sh
-./steamcmd +force_install_dir . +login anonymous +app_update 892970 +quit
+./steamcmd.sh +force_install_dir valheim-server/ +login anonymous +app_update 892970 +quit
 
 export SteamAppId=892970
 export SERVER_PASSWORD=(aws ssm get-parameter --name /app/valheim/world_password --with-decryption --query "Parameter.Value" --output text)
