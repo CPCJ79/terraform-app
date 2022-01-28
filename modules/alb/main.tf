@@ -25,7 +25,7 @@ resource "aws_lb" "instance" {
 resource "aws_alb_listener" "net_listener" {
   load_balancer_arn = aws_lb.instance.arn
 
-  port              = var.app_port
+  port              = var.lb_app_port
   protocol          = "TCP"
 
   default_action {
@@ -34,3 +34,20 @@ resource "aws_alb_listener" "net_listener" {
   }
 }
 
+# Application or network traget group dynamic block
+resource "aws_lb_target_group" "instance" {
+  name     = var.lb_tg_name
+  port     = var.lb_app_port
+  protocol = var.lb_app_proto
+  vpc_id   = var.lb_tg_vpc_id
+
+  dynamic "health_check" {
+    for_each = var.load_balancer_type == "network" ? [1] : []
+    content {
+      healthy_threshold   = 2
+      unhealthy_threshold = 2
+      port                = var.lb_app_port
+      protocol            = "TCP"
+    }
+  }
+}

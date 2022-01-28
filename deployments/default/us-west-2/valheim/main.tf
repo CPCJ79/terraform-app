@@ -27,13 +27,13 @@ module "app" {
 
 # network alb listener
 resource "aws_alb_listener" "net_listener0" {
-  load_balancer_arn = module.app.module.alb.aws_lb.instance.arn
+  load_balancer_arn = module.app.alb.id
 
   port              = 2457
   protocol          = "TCP"
 
   default_action {
-    target_group_arn = module.app.aws_lb_target_group.instance.id
+    target_group_arn = module.app.alb.tg_arn
     type             = "forward"
   }
 }
