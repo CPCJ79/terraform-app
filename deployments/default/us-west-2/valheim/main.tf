@@ -1,28 +1,19 @@
 locals {
   tags = {
-    AccountingCategory = "Gaymes"
+    AccountingCategory = "CaseyNSteve"
     Service            = "valheim"
   }
+  app_name = "Frankheim"
 }
 
 
-module "ttam_app" {
-  source = "../../../../modules/ttam_app"
+module "app" {
+  source = "../../../../modules/app"
 
-  # Max 28 characters, aws limitation
-  app_name = "valheim"
+  app_name = local.app_name
 
-  # load_balancer_type
-  # application -
-  # https, ssl cert, 
-  # network -
-  # tcp, no cert, no policy
-
-
-  load_balancer_type = "none"
+  load_balancer_type = "network"
   user_data          = file("${path.module}/user_data.sh")
-
-  dep_subnet = "protected"
 
   app_port  = 2456
   app_proto = "TCP"
@@ -32,4 +23,34 @@ module "ttam_app" {
   # ASG 
   min_instance = 1
   max_instance = 1
+}
+
+# network alb listener
+resource "aws_alb_listener" "net_listener0" {
+  load_balancer_arn = module.app.module.alb.aws_lb.instance.arn
+
+  port              = 2457
+  protocol          = "TCP"
+
+  default_action {
+    target_group_arn = module.app.aws_lb_target_group.instance.id
+    type             = "forward"
+  }
+}
+
+resource "aws_ssm_parameter" "world_name" {
+  name = "world_name"
+  type = "String"
+  value = local.app_name
+}
+
+resource "random_password" "world_password" {
+  length           = 8
+  special          = false
+}
+
+resource "aws_ssm_parameter" "world_password" {
+  name = "/app/${local.app_name}/world_password"
+  type = "String"
+  value = random_password.world_password
 }
