@@ -33,6 +33,18 @@ variable "app_proto" {
   default     = null
 }
 
+variable "app2_port" {
+  description = "Port number for the application to communicate on."
+  type        = number
+  default     = null
+}
+
+variable "app2_proto" {
+  description = "Application layer protocol 'HTTP', 'HTTPS', 'TCP', 'UDP', or  'ICMP'."
+  type        = string
+  default     = null
+}
+
 variable "db_instance" {
   description = "Database instance type, only 'postgres' is currently supported."
   type        = string

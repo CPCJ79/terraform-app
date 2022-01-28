@@ -1,3 +1,16 @@
+terraform {
+  required_providers {
+    aws = {
+      source = "hashicorp/aws"
+      version = "3.73.0"
+    }
+  }
+}
+
+provider "aws" {
+  # Configuration options
+}
+
 locals {
   tags = {
     AccountingCategory = "CaseyNSteve"
@@ -18,24 +31,14 @@ module "app" {
   app_port  = 2456
   app_proto = "TCP"
 
+  app2_port = 2457
+  app2_proto = "TCP"
+
   enable_efs = true
 
   # ASG 
   min_instance = 1
   max_instance = 1
-}
-
-# network alb listener
-resource "aws_alb_listener" "net_listener0" {
-  load_balancer_arn = module.app.alb.id
-
-  port              = 2457
-  protocol          = "TCP"
-
-  default_action {
-    target_group_arn = module.app.alb.tg_arn
-    type             = "forward"
-  }
 }
 
 resource "aws_ssm_parameter" "world_name" {
@@ -45,6 +48,7 @@ resource "aws_ssm_parameter" "world_name" {
 }
 
 resource "random_password" "world_password" {
+  min_numeric      = 0
   length           = 8
   special          = false
 }
@@ -52,5 +56,5 @@ resource "random_password" "world_password" {
 resource "aws_ssm_parameter" "world_password" {
   name = "/app/${local.app_name}/world_password"
   type = "String"
-  value = random_password.world_password
+  value = random_password.world_password.result
 }

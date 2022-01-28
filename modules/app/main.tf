@@ -26,11 +26,6 @@ resource "aws_iam_role" "instance_role" {
       },
     ]
   })
-
-  tags = {
-    "AccountingCategory" = data.aws_default_tags.default_tags.tags["AccountingCategory"]
-    "Service"            = data.aws_default_tags.default_tags.tags["Service"]
-  }
 }
 
 module "alb" {
@@ -40,6 +35,8 @@ module "alb" {
   lb_name            = join("-", [var.app_name, "lb"])
   lb_app_port        = var.app_port
   lb_app_proto       = var.app_proto
+  lb_app2_port        = var.app2_port
+  lb_app2_proto       = var.app2_proto
   lb_subnets = ["subnet-09c78817d0d8cb4a7"]
   # Security Groups are not supported for network load balancer targets
   lb_tg_name      = join("-", [var.app_name, "tg"])
@@ -119,7 +116,7 @@ resource "aws_security_group" "sg_egress" {
 # tfsec:ignore:AWS014
 resource "aws_launch_configuration" "instance_lc" {
   name_prefix          = join("-", [var.app_name, "lc"])
-  image_id             = data.aws_ssm_parameter.foundation2_ami.value
+  image_id             = "ami-06cffe063efe892ad"
   instance_type        = var.instance_type
   security_groups      = [aws_security_group.sg_egress.id, aws_security_group.allow_lb_port.id, aws_security_group.allow_app_port.id]
   iam_instance_profile = aws_iam_instance_profile.instance_instprof.name
@@ -141,7 +138,7 @@ resource "aws_autoscaling_group" "instance_asg" {
   launch_configuration = aws_launch_configuration.instance_lc.name
   min_size             = var.min_instance
   max_size             = var.max_instance
-  vpc_zone_identifier = "subnet-09c78817d0d8cb4a7"
+  vpc_zone_identifier = ["subnet-09c78817d0d8cb4a7"]
   target_group_arns         = var.load_balancer_type == "none" ? [] : [module.alb[0].tg_arn]
   health_check_type         = var.load_balancer_type == "none" ? null : "ELB"
   health_check_grace_period = var.load_balancer_type == "none" ? null : "300"
