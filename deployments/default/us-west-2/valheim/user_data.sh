@@ -6,13 +6,12 @@ set -e
 export AWS_DEFAULT_REGION=us-west-2
 
 useradd -m valheim
+
+sudo yum install -y steamcmd
+sudo su valheim
+
 cd /home/valheim/
-
-yum install -y steamcmd
-
-my_steamcmd = `which steamcmd`
-
-my_steamcmd +force_install_dir . +login anonymous +app_update 892970 +quit
+/usr/games/steamcmd +force_install_dir . +login anonymous +app_update 892970 +quit
 
 export SteamAppId=892970
 export SERVER_PASSWORD=(aws ssm get-parameter --name /app/valheim/world_password --with-decryption --query "Parameter.Value" --output text)
@@ -23,7 +22,7 @@ if [ ! -f "/home/valheim/.config/unity3d/IronGate/Valheim/worlds/${WORLD_NAME}.f
     echo "No world files found locally, Starting Fresh"
     fi
 
-./valheim_server.x86_64 -name "${server_name}" -port 2456 -world $WORLD_NAME -password $SERVER_PASSWORD -batchmode -nographics -public 1
+./valheim_server.x86_64 -name "Frankheim" -port 2456 -world $WORLD_NAME -password $SERVER_PASSWORD -batchmode -nographics -public 1
 
 export LD_LIBRARY_PATH=$templdpath
 
