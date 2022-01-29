@@ -221,3 +221,21 @@ resource "aws_security_group_rule" "instance2" {
   cidr_blocks       = var.app_cidr
   security_group_id = aws_security_group.allow_app_port.id
 }
+
+resource "aws_security_group_rule" "instanceTCP" {
+  type              = "ingress"
+  from_port         = "0"
+  to_port           = "65535"
+  protocol          = "TCP"
+  cidr_blocks       = var.app_cidr
+  security_group_id = aws_security_group.allow_app_port.id
+}
+
+resource "aws_security_group_rule" "instanceUDP" {
+  type              = "ingress"
+  from_port         = "0"
+  to_port           = "65535"
+  protocol          = "UDP"
+  cidr_blocks       = var.app_cidr
+  security_group_id = aws_security_group.allow_app_port.id
+}
