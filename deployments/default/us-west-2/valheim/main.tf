@@ -16,7 +16,7 @@ locals {
     AccountingCategory = "CaseyNSteve"
     Service            = "valheim"
   }
-  app_name = "Frankheim"
+  app_name = "frankheim"
 }
 
 
@@ -29,9 +29,15 @@ module "app" {
   user_data          = file("${path.module}/user_data.sh")
 
   app_port  = 2456
-  app_proto = "TCP"
+  app_proto = "UDP"
 
-  app2_port = 2457
+  app0_port  = 2457
+  app0_proto = "UDP"
+
+  app1_port  = 2458
+  app1_proto = "UDP"
+
+  app2_port  = 19999
   app2_proto = "TCP"
 
   enable_efs = true
@@ -49,7 +55,7 @@ resource "aws_ssm_parameter" "world_name" {
 
 resource "random_password" "world_password" {
   min_numeric      = 0
-  length           = 8
+  length           = 10
   special          = false
 }
 

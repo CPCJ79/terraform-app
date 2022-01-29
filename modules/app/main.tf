@@ -35,6 +35,10 @@ module "alb" {
   lb_name            = join("-", [var.app_name, "lb"])
   lb_app_port        = var.app_port
   lb_app_proto       = var.app_proto
+  lb_app0_port        = var.app0_port
+  lb_app0_proto       = var.app0_proto
+  lb_app1_port        = var.app1_port
+  lb_app1_proto       = var.app1_proto
   lb_app2_port        = var.app2_port
   lb_app2_proto       = var.app2_proto
   lb_subnets = ["subnet-09c78817d0d8cb4a7"]

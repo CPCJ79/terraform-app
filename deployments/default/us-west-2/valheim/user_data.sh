@@ -6,24 +6,31 @@ set -e
 export AWS_DEFAULT_REGION=us-west-2
 
 useradd -m valheim
-
-sudo yum install -y glibc.i686 libstdc++.i686
-sudo su valheim
+sudo yum install -y glibc.i686 libstdc++.i686 SDL2
 
 cd /home/valheim/
-mkdir -p valheim-server/ curl -sqL "https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz" | tar zxvf -
-/home/valheim/steamcmd.sh +login anonymous +force_install_dir valheim-server/ +app_update 896660 validate +quit
+mkdir -p valheim-server/ 
+curl -sqL "https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz" | tar zxvf -
+chown -R valheim:valheim /home/valheim/
 
-export SteamAppId=892970
-export SERVER_PASSWORD=(aws ssm get-parameter --name /app/valheim/world_password --with-decryption --query "Parameter.Value" --output text)
-export WORLD_NAME=(aws ssm get-parameter --name /app/valheim/world_name --with-decryption --query "Parameter.Value" --output text)
+sysctl -w net.ipv6.conf.all.disable_ipv6=1
+sysctl -w net.ipv6.conf.default.disable_ipv6=1
+
+systemctl restart network.service
+
+sudo su valheim
+
+linux64 /home/valheim/steamcmd.sh +force_install_dir valheim-server/ +login anonymous +app_update 896660 validate +quit
+
+export WORLD_PASSWORD=`aws ssm get-parameter --name /app/Frankheim/world_password --with-decryption --query "Parameter.Value" --output text`
+export WORLD_NAME=`aws ssm get-parameter --name /app/Frankheim/world_name --with-decryption --query "Parameter.Value" --output text`
 export SERVER_NAME="FrankenHeim"
+export HOME=/home/valheim
+export SteamAppId=892970
+export templdpath=$LD_LIBRARY_PATH
+export LD_LIBRARY_PATH=./linux64:$LD_LIBRARY_PATH
 
-if [ ! -f "/home/valheim/.config/unity3d/IronGate/Valheim/worlds/${WORLD_NAME}.fwl" ]; then
-    echo "No world files found locally, Starting Fresh"
-    fi
 
-./valheim_server.x86_64 -name "Frankheim" -port 2456 -world $WORLD_NAME -password $SERVER_PASSWORD -batchmode -nographics -public 1
+/home/valheim/valheim-server/valheim_server.x86_64 -name "Frankheim" -port 2456 -world $WORLD_NAME -password $SERVER_PASSWORD -batchmode -nographics -public 1
 
 export LD_LIBRARY_PATH=$templdpath
-
