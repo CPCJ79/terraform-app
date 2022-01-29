@@ -53,14 +53,9 @@ resource "aws_ssm_parameter" "world_name" {
   value = local.app_name
 }
 
-resource "random_password" "world_password" {
-  min_numeric      = 0
-  length           = 10
-  special          = false
-}
-
 resource "aws_ssm_parameter" "world_password" {
   name = "/app/${local.app_name}/world_password"
   type = "SecureString"
-  value = random_password.world_password.result
+  value = "butts"
+
 }

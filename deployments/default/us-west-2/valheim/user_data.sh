@@ -22,15 +22,12 @@ sudo su valheim
 
 linux64 /home/valheim/steamcmd.sh +force_install_dir valheim-server/ +login anonymous +app_update 896660 validate +quit
 
-export WORLD_PASSWORD=`aws ssm get-parameter --name /app/Frankheim/world_password --with-decryption --query "Parameter.Value" --output text`
-export WORLD_NAME=`aws ssm get-parameter --name /app/Frankheim/world_name --with-decryption --query "Parameter.Value" --output text`
-export SERVER_NAME="FrankenHeim"
 export HOME=/home/valheim
 export SteamAppId=892970
 export templdpath=$LD_LIBRARY_PATH
 export LD_LIBRARY_PATH=./linux64:$LD_LIBRARY_PATH
 
 
-/home/valheim/valheim-server/valheim_server.x86_64 -name "Frankheim" -port 2456 -world $WORLD_NAME -password $SERVER_PASSWORD -batchmode -nographics -public 1
+/home/valheim/valheim-server/valheim_server.x86_64 -name "valheim" -port 2456 -world "valheim" -password "butts" -batchmode -nographics -public 1
 
 export LD_LIBRARY_PATH=$templdpath
