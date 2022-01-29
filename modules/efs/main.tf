@@ -19,4 +19,12 @@ resource "aws_efs_mount_target" "efs" {
 
 resource "aws_efs_access_point" "efs-access-point" {
   file_system_id = aws_efs_file_system.efs.id
+  root_directory {
+    path = "/valheim"
+    creation_info {
+      owner_gid = 0
+      owner_uid = 0
+      permissions = "755"
+    }
+  }
 }

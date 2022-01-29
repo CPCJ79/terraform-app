@@ -28,6 +28,9 @@ module "app" {
   load_balancer_type = "network"
   user_data          = file("${path.module}/user_data.sh")
 
+  lb_port = 19999
+  lb_proto = "TCP"
+
   app_port  = 2456
   app_proto = "UDP"
 

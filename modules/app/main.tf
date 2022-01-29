@@ -129,7 +129,7 @@ resource "aws_launch_configuration" "instance_lc" {
   name_prefix          = join("-", [var.app_name, "lc"])
   image_id             = "ami-06cffe063efe892ad"
   instance_type        = var.instance_type
-  security_groups      = [aws_security_group.sg_egress.id, aws_security_group.allow_lb_port.id, aws_security_group.allow_app_port.id]
+  security_groups      = [aws_security_group.sg_egress.id, aws_security_group.allow_app_port.id]
   iam_instance_profile = aws_iam_instance_profile.instance_instprof.name
   user_data            = var.user_data
 
@@ -176,26 +176,6 @@ resource "aws_autoscaling_group" "instance_asg" {
   }
 }
 
-resource "aws_security_group" "allow_lb_port" {
-  # count       = (can(coalesce(var.lb_port))) ? 1 : 0
-  name        = join("-", [var.app_name, "lb-port"])
-  description = var.app_name
-  vpc_id      = "vpc-017932fd879703868"
-
-  # if lb_port is set, create ingress rule. If lb_port is not set no ingress rule. 
-  dynamic "ingress" {
-    for_each = (can(coalesce(var.lb_port))) ? [1] : []
-    content {
-      description = "allow_lb_port"
-      from_port   = var.lb_port
-      to_port     = var.lb_port
-      protocol    = "TCP"
-      cidr_blocks = [data.aws_ssm_parameter.vpc_cidr.value]
-    }
-  }
-
-}
-
 resource "aws_security_group" "allow_app_port" {
   # count       = (can(coalesce(var.app_port))) ? 1 : 0
   name        = join("-", [var.app_name, "app-port"])
@@ -213,4 +193,31 @@ resource "aws_security_group" "allow_app_port" {
       cidr_blocks = var.app_cidr
     }
   }
+}
+
+resource "aws_security_group_rule" "instance0" {
+  type              = "ingress"
+  from_port         = var.app0_port
+  to_port           = var.app0_port
+  protocol          = var.app0_proto
+  cidr_blocks       = var.app_cidr
+  security_group_id = aws_security_group.allow_app_port.id
+}
+
+resource "aws_security_group_rule" "instance1" {
+  type              = "ingress"
+  from_port         = var.app1_port
+  to_port           = var.app1_port
+  protocol          = var.app1_proto
+  cidr_blocks       = var.app_cidr
+  security_group_id = aws_security_group.allow_app_port.id
+}
+
+resource "aws_security_group_rule" "instance2" {
+  type              = "ingress"
+  from_port         = var.app2_port
+  to_port           = var.app2_port
+  protocol          = var.app2_proto
+  cidr_blocks       = var.app_cidr
+  security_group_id = aws_security_group.allow_app_port.id
 }
