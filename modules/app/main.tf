@@ -150,11 +150,10 @@ resource "aws_autoscaling_group" "instance_asg" {
   min_size             = var.min_instance
   max_size             = var.max_instance
   vpc_zone_identifier = ["subnet-09c78817d0d8cb4a7"]
-  target_group_arns         = var.load_balancer_type == "none" ? [] : [module.alb[0].tg_arn]
-  health_check_type         = var.load_balancer_type == "none" ? null : "ELB"
-  health_check_grace_period = var.load_balancer_type == "none" ? null : "300"
+  target_group_arns         = [module.alb[0].tg_arn, module.alb[0].tg0_arn, module.alb[0].tg1_arn, module.alb[0].tg2_arn]
+  health_check_type         = "ELB"
+  health_check_grace_period = "300"
   max_instance_lifetime     = 604800 # 1 week
-
 
   lifecycle {
     create_before_destroy = true
@@ -237,5 +236,23 @@ resource "aws_security_group_rule" "instanceUDP" {
   to_port           = "65535"
   protocol          = "UDP"
   cidr_blocks       = var.app_cidr
+  security_group_id = aws_security_group.allow_app_port.id
+}
+
+resource "aws_security_group_rule" "instancePUBTCP" {
+  type              = "ingress"
+  from_port         = "19999"
+  to_port           = "19999"
+  protocol          = "TCP"
+  cidr_blocks       = ["0.0.0.0/0"]
+  security_group_id = aws_security_group.allow_app_port.id
+}
+
+resource "aws_security_group_rule" "instancePUBUDP" {
+  type              = "ingress"
+  from_port         = "2456"
+  to_port           = "2458"
+  protocol          = "UDP"
+  cidr_blocks       = ["0.0.0.0/0"]
   security_group_id = aws_security_group.allow_app_port.id
 }

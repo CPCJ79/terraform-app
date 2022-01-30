@@ -59,20 +59,6 @@ resource "aws_alb_listener" "net_listener1" {
   }
 }
 
-# network alb listener
-resource "aws_alb_listener" "net_listener2" {
-  load_balancer_arn = aws_lb.instance.arn
-
-  port              = var.lb_app2_port
-  protocol          = var.lb_app2_proto
-
-  default_action {
-    target_group_arn = aws_lb_target_group.instance2.id
-    type             = "forward"
-  }
-}
-
-# Application or network traget group dynamic block
 resource "aws_lb_target_group" "instance" {
   name     = var.lb_tg_name
   port     = var.lb_app_port
@@ -90,7 +76,6 @@ resource "aws_lb_target_group" "instance" {
   }
 }
 
-# Application or network traget group dynamic block
 resource "aws_lb_target_group" "instance0" {
   name     = "${var.lb_tg_name}-0"
   port     = var.lb_app0_port
@@ -108,7 +93,6 @@ resource "aws_lb_target_group" "instance0" {
   }
 }
 
-# Application or network traget group dynamic block
 resource "aws_lb_target_group" "instance1" {
   name     = "${var.lb_tg_name}-1"
   port     = var.lb_app1_port
@@ -126,7 +110,6 @@ resource "aws_lb_target_group" "instance1" {
   }
 }
 
-# Application or network traget group dynamic block
 resource "aws_lb_target_group" "instance2" {
   name     = "${var.lb_tg_name}-2"
   port     = var.lb_app2_port
