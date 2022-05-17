@@ -186,9 +186,9 @@ resource "aws_autoscaling_schedule" "wakeup-weekday" {
 
 resource "aws_autoscaling_schedule" "wakeup-weekend" {
   scheduled_action_name  = "wakeup"
-  min_size               = 1
-  max_size               = 1
-  desired_capacity       = 1
+  min_size               = var.min_instance
+  max_size               = var.max_instance
+  desired_capacity       = var.max_instance
   recurrence             = "0 0 * * 6-7"
   autoscaling_group_name = aws_autoscaling_group.instance_asg.name
 }
