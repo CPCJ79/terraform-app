@@ -147,8 +147,8 @@ resource "aws_launch_configuration" "instance_lc" {
 resource "aws_autoscaling_group" "instance_asg" {
   name                      = join("-", [var.app_name, "asg"])
   launch_configuration      = aws_launch_configuration.instance_lc.name
-  min_size                  = 0
-  max_size                  = 0
+  min_size                  = var.min_instance
+  max_size                  = var.max_instance
   vpc_zone_identifier       = ["subnet-09c78817d0d8cb4a7"]
   target_group_arns         = [module.alb[0].tg_arn, module.alb[0].tg0_arn, module.alb[0].tg1_arn, module.alb[0].tg2_arn]
   health_check_type         = "ELB"
@@ -173,33 +173,6 @@ resource "aws_autoscaling_group" "instance_asg" {
     value               = var.app_name
     propagate_at_launch = true
   }
-}
-
-resource "aws_autoscaling_schedule" "wakeup-weekday" {
-  scheduled_action_name  = "wakeup"
-  min_size               = var.min_instance
-  max_size               = var.max_instance
-  desired_capacity       = var.min_instance
-  recurrence             = "17 0 * * 1-5"
-  autoscaling_group_name = aws_autoscaling_group.instance_asg.name
-}
-
-resource "aws_autoscaling_schedule" "wakeup-weekend" {
-  scheduled_action_name  = "wakeup"
-  min_size               = var.min_instance
-  max_size               = var.max_instance
-  desired_capacity       = var.max_instance
-  recurrence             = "0 0 * * 6-7"
-  autoscaling_group_name = aws_autoscaling_group.instance_asg.name
-}
-
-resource "aws_autoscaling_schedule" "ssshhh" {
-  scheduled_action_name  = "ssshhh"
-  min_size               = 0
-  max_size               = 0
-  desired_capacity       = 0
-  recurrence             = "3 0 * * 6-7"
-  autoscaling_group_name = aws_autoscaling_group.instance_asg.name
 }
 
 resource "aws_security_group" "allow_app_port" {
@@ -263,5 +236,23 @@ resource "aws_security_group_rule" "instancePUBUDP" {
   to_port           = "2458"
   protocol          = "UDP"
   cidr_blocks       = ["0.0.0.0/0"]
+  security_group_id = aws_security_group.allow_app_port.id
+}
+
+resource "aws_security_group_rule" "LB-health" {
+  type              = "ingress"
+  from_port         = "22"
+  to_port           = "22"
+  protocol          = "TCP"
+  cidr_blocks       = ["172.31.0.0/16"]
+  security_group_id = aws_security_group.allow_app_port.id
+}
+
+resource "aws_security_group_rule" "EFS" {
+  type              = "ingress"
+  from_port         = "2049"
+  to_port           = "2049"
+  protocol          = "TCP"
+  cidr_blocks       = ["172.31.0.0/16"]
   security_group_id = aws_security_group.allow_app_port.id
 }

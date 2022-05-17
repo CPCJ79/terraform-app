@@ -62,3 +62,30 @@ resource "aws_ssm_parameter" "world_password" {
   value = "butts"
 
 }
+
+resource "aws_autoscaling_schedule" "wakeup-weekday" {
+  scheduled_action_name  = "wakeup"
+  min_size               = 1
+  max_size               = 1
+  desired_capacity       = 1
+  recurrence             = "17 0 * * 1-5"
+  autoscaling_group_name = module.app.asg_name
+}
+
+resource "aws_autoscaling_schedule" "wakeup-weekend" {
+  scheduled_action_name  = "wakeup"
+  min_size               = 1
+  max_size               = 1
+  desired_capacity       = 1
+  recurrence             = "0 0 * * 6-7"
+  autoscaling_group_name = module.app.asg_name
+}
+
+resource "aws_autoscaling_schedule" "ssshhh" {
+  scheduled_action_name  = "ssshhh"
+  min_size               = 0
+  max_size               = 0
+  desired_capacity       = 0
+  recurrence             = "3 0 * * 6-7"
+  autoscaling_group_name = module.app.asg_name
+}
