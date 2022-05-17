@@ -6,11 +6,11 @@ set -e
 export AWS_DEFAULT_REGION=us-west-2
 
 useradd -m valheim
-sudo yum install -y glibc.i686 libstdc++.i686 SDL2 amazon-efs-utils
+sudo yum install -y glibc.i686 libstdc++.i686 SDL2 amazon-efs-utils --setopt=protected_multilib=false 
 
 cd /home/valheim/
 mkdir -p /home/valheim/.config/
-sudo mount -t efs -o tls,accesspoint=fsap-061ee2b59be49fb07,iam fs-074f544272d503693:/ /home/valheim/.config
+sudo mount -t efs -o tls,accesspoint=fsap-0014c62c2787ea364,iam fs-019858fed90b4c23f:/ /home/valheim/.config
 
 mkdir -p valheim-server/ 
 curl -sqL "https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz" | tar zxvf -

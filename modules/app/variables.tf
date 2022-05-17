@@ -1,19 +1,19 @@
 variable "allowed_inbound_cidr_blocks" {
   description = "A list of CIDR-formatted IP address ranges from which the EC2 Instances will allow connections to Security Group."
   type        = list(string)
-  default     = ["10.0.0.0/8"]
+  default     = ["172.31.0.0/16"]
 }
 
 variable "allowed_ssh_cidrs" {
   description = "A list of CIDR-formatted IP address ranges from which the EC2 Instances will allow connections to Security Group."
   type        = list(string)
-  default     = ["10.0.0.0/8"]
+  default     = ["172.31.0.0/16"]
 }
 
 variable "app_cidr" {
   description = "A list of CIDR-formatted IP address ranges from which the EC2 Instances will allow connections to Security Group."
   type        = list(string)
-  default     = ["10.0.0.0/8"]
+  default     = ["172.31.0.0/16"]
 }
 
 variable "app_name" {
@@ -28,6 +28,42 @@ variable "app_port" {
 }
 
 variable "app_proto" {
+  description = "Application layer protocol 'HTTP', 'HTTPS', 'TCP', 'UDP', or  'ICMP'."
+  type        = string
+  default     = null
+}
+
+variable "app0_port" {
+  description = "Port number for the application to communicate on."
+  type        = number
+  default     = null
+}
+
+variable "app0_proto" {
+  description = "Application layer protocol 'HTTP', 'HTTPS', 'TCP', 'UDP', or  'ICMP'."
+  type        = string
+  default     = null
+}
+
+variable "app1_port" {
+  description = "Port number for the application to communicate on."
+  type        = number
+  default     = null
+}
+
+variable "app1_proto" {
+  description = "Application layer protocol 'HTTP', 'HTTPS', 'TCP', 'UDP', or  'ICMP'."
+  type        = string
+  default     = null
+}
+
+variable "app2_port" {
+  description = "Port number for the application to communicate on."
+  type        = number
+  default     = null
+}
+
+variable "app2_proto" {
   description = "Application layer protocol 'HTTP', 'HTTPS', 'TCP', 'UDP', or  'ICMP'."
   type        = string
   default     = null
@@ -82,7 +118,7 @@ variable "health_response" {
 variable "instance_type" {
   description = "Instance type to be provisiooned, example 't3.medium'."
   type        = string
-  default     = "t3.medium"
+  default     = "t3.xlarge"
 }
 
 variable "lb_port" {

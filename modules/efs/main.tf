@@ -1,13 +1,5 @@
 terraform {
-  required_version = "~> 0.14"
-}
-
-data "aws_ssm_parameter" "private_subnets" {
-  name = "/${var.vpc_name}/vpc/subnets/private/ids-list"
-}
-
-data "aws_ssm_parameter" "protected_subnets" {
-  name = "/${var.vpc_name}/vpc/subnets/protected/ids-list"
+  required_version = "~> 1.0"
 }
 
 resource "random_uuid" "efs_creation_token" {}
@@ -20,15 +12,19 @@ resource "aws_efs_file_system" "efs" {
 
 resource "aws_efs_mount_target" "efs" {
   file_system_id = aws_efs_file_system.efs.id
-  subnet_id = (
-    var.efs_subnet == "private" ?
-    element(split(",", data.aws_ssm_parameter.private_subnets.value), 0) :
-    element(split(",", data.aws_ssm_parameter.protected_subnets.value), 0)
-  )
+  subnet_id = ("subnet-09c78817d0d8cb4a7")
   security_groups = [var.instance_security_group]
   # Security Groups are not supported for network load balancer targets
 }
 
 resource "aws_efs_access_point" "efs-access-point" {
   file_system_id = aws_efs_file_system.efs.id
+  root_directory {
+    path = "/valheim"
+    creation_info {
+      owner_gid = 0
+      owner_uid = 0
+      permissions = "755"
+    }
+  }
 }

@@ -27,6 +27,42 @@ variable "lb_app_proto" {
   default     = "HTTPS"
 }
 
+variable "lb_app0_port" {
+  description = "Port number for the application to communicate on."
+  type        = number
+  default     = "443"
+}
+
+variable "lb_app0_proto" {
+  description = "Application layer protocol 'HTTP', 'HTTPS', 'TCP', 'UDP', or  'ICMP'."
+  type        = string
+  default     = "HTTPS"
+}
+
+variable "lb_app1_port" {
+  description = "Port number for the application to communicate on."
+  type        = number
+  default     = "443"
+}
+
+variable "lb_app1_proto" {
+  description = "Application layer protocol 'HTTP', 'HTTPS', 'TCP', 'UDP', or  'ICMP'."
+  type        = string
+  default     = "HTTPS"
+}
+
+variable "lb_app2_port" {
+  description = "Port number for the application to communicate on."
+  type        = number
+  default     = "443"
+}
+
+variable "lb_app2_proto" {
+  description = "Application layer protocol 'HTTP', 'HTTPS', 'TCP', 'UDP', or  'ICMP'."
+  type        = string
+  default     = "HTTPS"
+}
+
 variable "lb_port" {
   description = "Port number for the load balancer to communicate on."
   type        = string

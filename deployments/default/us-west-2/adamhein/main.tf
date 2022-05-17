@@ -13,10 +13,10 @@ provider "aws" {
 
 locals {
   tags = {
-    AccountingCategory = "CaseyNSteve"
-    Service            = "valheim"
+    AccountingCategory = "CaseyNAdam"
+    Service            = "adamheim"
   }
-  app_name = "frankheim"
+  app_name = "adamheim"
 }
 
 
