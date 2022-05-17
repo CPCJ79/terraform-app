@@ -35,13 +35,13 @@ module "alb" {
   lb_name            = join("-", [var.app_name, "lb"])
   lb_app_port        = var.app_port
   lb_app_proto       = var.app_proto
-  lb_app0_port        = var.app0_port
-  lb_app0_proto       = var.app0_proto
-  lb_app1_port        = var.app1_port
-  lb_app1_proto       = var.app1_proto
-  lb_app2_port        = var.app2_port
-  lb_app2_proto       = var.app2_proto
-  lb_subnets = ["subnet-09c78817d0d8cb4a7"]
+  lb_app0_port       = var.app0_port
+  lb_app0_proto      = var.app0_proto
+  lb_app1_port       = var.app1_port
+  lb_app1_proto      = var.app1_proto
+  lb_app2_port       = var.app2_port
+  lb_app2_proto      = var.app2_proto
+  lb_subnets         = ["subnet-09c78817d0d8cb4a7"]
   # Security Groups are not supported for network load balancer targets
   lb_tg_name      = join("-", [var.app_name, "tg"])
   lb_tg_vpc_id    = "vpc-017932fd879703868"
@@ -145,11 +145,11 @@ resource "aws_launch_configuration" "instance_lc" {
 }
 
 resource "aws_autoscaling_group" "instance_asg" {
-  name                 = join("-", [var.app_name, "asg"])
-  launch_configuration = aws_launch_configuration.instance_lc.name
-  min_size             = var.min_instance
-  max_size             = var.max_instance
-  vpc_zone_identifier = ["subnet-09c78817d0d8cb4a7"]
+  name                      = join("-", [var.app_name, "asg"])
+  launch_configuration      = aws_launch_configuration.instance_lc.name
+  min_size                  = 0
+  max_size                  = 0
+  vpc_zone_identifier       = ["subnet-09c78817d0d8cb4a7"]
   target_group_arns         = [module.alb[0].tg_arn, module.alb[0].tg0_arn, module.alb[0].tg1_arn, module.alb[0].tg2_arn]
   health_check_type         = "ELB"
   health_check_grace_period = "300"
@@ -173,6 +173,33 @@ resource "aws_autoscaling_group" "instance_asg" {
     value               = var.app_name
     propagate_at_launch = true
   }
+}
+
+resource "aws_autoscaling_schedule" "wakeup-weekday" {
+  scheduled_action_name  = "wakeup"
+  min_size               = var.min_instance
+  max_size               = var.max_instance
+  desired_capacity       = var.min_instance
+  recurrence             = "17 0 * * 1-5"
+  autoscaling_group_name = aws_autoscaling_group.instance_asg.name
+}
+
+resource "aws_autoscaling_schedule" "wakeup-weekend" {
+  scheduled_action_name  = "wakeup"
+  min_size               = 1
+  max_size               = 1
+  desired_capacity       = 1
+  recurrence             = "0 0 * * 6-7"
+  autoscaling_group_name = aws_autoscaling_group.instance_asg.name
+}
+
+resource "aws_autoscaling_schedule" "ssshhh" {
+  scheduled_action_name  = "ssshhh"
+  min_size               = 0
+  max_size               = 0
+  desired_capacity       = 0
+  recurrence             = "3 0 * * 6-7"
+  autoscaling_group_name = aws_autoscaling_group.instance_asg.name
 }
 
 resource "aws_security_group" "allow_app_port" {
