@@ -71,6 +71,7 @@ module "alb" {
 
 module "efs" {
   source                  = "../../modules/efs"
+  app_name                = var.app_name
   count                   = var.enable_efs ? 1 : 0
   instance_security_group = aws_security_group.allow_app_port.id
   efs_subnet              = data.aws_subnet.default.id

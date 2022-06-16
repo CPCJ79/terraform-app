@@ -19,3 +19,9 @@ variable "vpc_name" {
   type        = string
   default     = "main"
 }
+
+
+variable "app_name" {
+  description = "Name of Application"
+  type        = string
+}

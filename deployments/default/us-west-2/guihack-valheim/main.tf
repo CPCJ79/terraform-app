@@ -60,5 +60,4 @@ resource "aws_ssm_parameter" "world_password" {
   name = "/app/${local.app_name}/world_password"
   type = "SecureString"
   value = "ballz"
-
 }

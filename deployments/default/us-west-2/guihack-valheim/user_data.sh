@@ -3,16 +3,17 @@ exec > >(tee /var/log/user-data.log|logger -t user-data -s 2>/dev/console) 2>&1
 
 set -e
 
-export AWS_DEFAULT_REGION=us-west-2
-sudo yum install -y awscli
-export DB_PASSWORD=$(aws ssm get-parameter --name /app/url-shorty/db_password --with-decryption --query Parameter.Value --output text)
+export AWS_DEFAULT_REGION=us-east-2
+export DB_PASSWORD=$(aws ssm get-parameter --name /app/guihack-valheim/world_password --with-decryption --query Parameter.Value --output text)
+export EFS_ACCESS_POINT_ID=$(aws ssm get-parameter --name /app/guihack-valheim/efs_access_point --query Parameter.Value --output text)
+export EFS_FILESYSTEM_POINT_ID=$(aws ssm get-parameter --name /app/guihack-valheim/efs_fs_id --query Parameter.Value --output text)
 
 useradd -m valheim
 sudo yum install -y glibc.i686 libstdc++.i686 SDL2 amazon-efs-utils --setopt=protected_multilib=false 
 
 cd /home/valheim/
 mkdir -p /home/valheim/.config/
-sudo mount -t efs -o tls,accesspoint=fsap-0014c62c2787ea364,iam fs-019858fed90b4c23f:/ /home/valheim/.config
+sudo mount -t efs -o tls,accesspoint=${EFS_ACCESS_POINT_ID},iam ${EFS_FILESYSTEM_POINT_ID}:/ /home/valheim/.config
 
 mkdir -p valheim-server/ 
 curl -sqL "https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz" | tar zxvf -
