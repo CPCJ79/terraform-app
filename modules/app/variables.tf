@@ -118,7 +118,7 @@ variable "health_response" {
 variable "instance_type" {
   description = "Instance type to be provisiooned, example 't3.medium'."
   type        = string
-  default     = "t3.xlarge"
+  default     = "t3.medium"
 }
 
 variable "lb_port" {
