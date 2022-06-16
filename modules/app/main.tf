@@ -8,6 +8,21 @@ data "aws_caller_identity" "current" {}
 
 data "aws_default_tags" "default_tags" {}
 
+data "aws_ssm_parameter" "ami_name" {
+    name = "/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2"
+}
+
+data "aws_vpc" "default" {
+  default = true
+}
+
+data "aws_subnet" "default" {
+  filter {
+    name   = "tag:network_hack_name"
+    values = ["games_net"]
+  }
+}
+
 resource "aws_iam_role" "instance_role" {
   name = "${var.app_name}-Role"
 
@@ -41,13 +56,13 @@ module "alb" {
   lb_app1_proto      = var.app1_proto
   lb_app2_port       = var.app2_port
   lb_app2_proto      = var.app2_proto
-  lb_subnets         = ["subnet-09c78817d0d8cb4a7"]
+  lb_subnets         = [data.aws_subnet.default.id]
   # Security Groups are not supported for network load balancer targets
   lb_tg_name      = join("-", [var.app_name, "tg"])
-  lb_tg_vpc_id    = "vpc-017932fd879703868"
+  lb_tg_vpc_id    = data.aws_vpc.default.id
   lb_proto        = var.lb_proto
   lb_port         = var.lb_port
-  lb_sg_vpc_id    = "vpc-017932fd879703868"
+  lb_sg_vpc_id    = data.aws_vpc.default.id
   lb_app_cidr     = var.app_cidr
   health_path     = var.health_path
   health_response = var.health_response
@@ -56,9 +71,10 @@ module "alb" {
 
 module "efs" {
   source                  = "../../modules/efs"
+  app_name                = var.app_name
   count                   = var.enable_efs ? 1 : 0
   instance_security_group = aws_security_group.allow_app_port.id
-  efs_subnet              = "subnet-09c78817d0d8cb4a7"
+  efs_subnet              = data.aws_subnet.default.id
 }
 
 data "aws_iam_policy_document" "instance_iam_policy" {
@@ -109,7 +125,7 @@ resource "aws_iam_instance_profile" "instance_instprof" {
 resource "aws_security_group" "sg_egress" {
   name        = join("-", [var.app_name, "sg-egress"])
   description = var.app_name
-  vpc_id      = "vpc-017932fd879703868"
+  vpc_id      = data.aws_vpc.default.id
 
   # if app port is set, create egress rule. If app port is not set no egress rule. 
   dynamic "egress" {
@@ -127,7 +143,7 @@ resource "aws_security_group" "sg_egress" {
 # tfsec:ignore:AWS014
 resource "aws_launch_configuration" "instance_lc" {
   name_prefix          = join("-", [var.app_name, "lc"])
-  image_id             = "ami-06cffe063efe892ad"
+  image_id             = data.aws_ssm_parameter.ami_name.value
   instance_type        = var.instance_type
   security_groups      = [aws_security_group.sg_egress.id, aws_security_group.allow_app_port.id]
   iam_instance_profile = aws_iam_instance_profile.instance_instprof.name
@@ -149,7 +165,7 @@ resource "aws_autoscaling_group" "instance_asg" {
   launch_configuration      = aws_launch_configuration.instance_lc.name
   min_size                  = var.min_instance
   max_size                  = var.max_instance
-  vpc_zone_identifier       = ["subnet-09c78817d0d8cb4a7"]
+  vpc_zone_identifier       = [data.aws_subnet.default.id]
   target_group_arns         = [module.alb[0].tg_arn, module.alb[0].tg0_arn, module.alb[0].tg1_arn, module.alb[0].tg2_arn]
   health_check_type         = "ELB"
   health_check_grace_period = "300"
@@ -179,7 +195,7 @@ resource "aws_security_group" "allow_app_port" {
   # count       = (can(coalesce(var.app_port))) ? 1 : 0
   name        = join("-", [var.app_name, "app-port"])
   description = var.app_name
-  vpc_id      = "vpc-017932fd879703868"
+  vpc_id      = data.aws_vpc.default.id
 
   # if lb_port is set, create ingress rule. If lb_port is not set no ingress rule. 
   dynamic "ingress" {
