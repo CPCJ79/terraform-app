@@ -9,7 +9,7 @@ export EFS_ACCESS_POINT_ID=$(aws ssm get-parameter --name /app/frising/efs_acces
 export EFS_FILESYSTEM_POINT_ID=$(aws ssm get-parameter --name /app/frising/efs_fs_id --query Parameter.Value --output text)
 
 useradd -m vrising
-sudo yum -y docker
+sudo yum -y install docker glibc.i686 libstdc++.i686 SDL2 amazon-efs-utils --setopt=protected_multilib=false
 
 systemctl start docker
 
